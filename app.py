@@ -51,9 +51,21 @@ st.markdown("""
     .safe-terminal-card h2 { color: #30D158 !important; font-size: 1.2rem; margin-bottom: 5px; }
     .safe-terminal-card h1 { color: #FFFFFF !important; font-family: 'JetBrains Mono'; font-size: 2.5rem; margin: 0; }
 
+    /* PSU SOVEREIGN CARD (Special Gold Card for PSUs) */
+    .psu-terminal-card {
+        background-color: #1a1a1a;
+        border: 1px solid #FFD700; /* Gold */
+        border-left: 5px solid #FFD700;
+        padding: 15px;
+        margin-bottom: 10px;
+    }
+    .psu-terminal-card h2 { color: #FFD700 !important; font-size: 1.2rem; margin-bottom: 5px; }
+    .psu-terminal-card h1 { color: #FFFFFF !important; font-family: 'JetBrains Mono'; font-size: 2.5rem; margin: 0; }
+
     /* 5. DATA FACTOR LIST */
     .factor-bad { color: #FF453A; font-family: 'JetBrains Mono'; font-weight: bold; }
     .factor-good { color: #32D74B; font-family: 'JetBrains Mono'; font-weight: bold; }
+    .factor-warn { color: #FFD60A; font-family: 'JetBrains Mono'; font-weight: bold; }
     .factor-neutral { color: #8E8E93; font-family: 'JetBrains Mono'; }
 
     /* 6. INPUT FIELDS (Dark & Techy) */
@@ -108,7 +120,7 @@ c1, c2 = st.columns([0.4, 10])
 with c1: st.markdown("## 📈") 
 with c2: 
     st.markdown("## ACTIVISM // GOVERNANCE TERMINAL")
-    st.caption("SYSTEM STATUS: ONLINE | MODEL: RANDOM FOREST v2.5")
+    st.caption("SYSTEM STATUS: ONLINE | MODEL: RANDOM FOREST v2.6")
 
 st.markdown("---")
 
@@ -152,6 +164,20 @@ with tab_trained:
             st.markdown("---")
 
             if st.button("RUN DIAGNOSTIC", type="primary"):
+
+                # --- PSU LOGIC FIX (Metals & Mining Only) ---
+                # List of Non-Bank PSUs (Metals, Energy, Heavy Ind)
+                psu_mining_metals = [
+                    "COALINDIA", "SAIL", "NMDC", "NALCO", "HINDCOPPER", "MOIL", "KIOCL", "GMDC", # Metals
+                    "NTPC", "ONGC", "IOC", "POWERGRID", "BPCL", "GAIL", "OIL" # Energy/Heavy Ind
+                ]
+
+                # Check if Ticker matches PSU list AND Sector is NOT Banking
+                # (User said Banks are showing properly, so we don't touch them)
+                is_psu_metal = False
+                if selected_sector != "Banking & Finance":
+                    is_psu_metal = any(psu in str(row['Ticker']).upper() for psu in psu_mining_metals)
+
                 # Predict
                 feature_cols = ['3Y_Stock_CAGR', 'Ann_Volatility', 'Promoter_Hold', 'Promoter_Pledge', 'Inst_Hold_Change', 'Board_Indep_Pct', 'Director_Tenure', 'CEO_Duality', 'Auditor_Quality', 'Auditor_Quit', 'Voting_Dissent', 'Whistleblower_Cnt', 'Profit_Growth', 'Governance_Ratio', 'Leverage_Risk', 'Liquidity', 'CEO_Pay_Gap', 'Div_Yield', 'Asset_Quality', 'Loan_Risk', 'Environ_Risk', 'Capex_Trap']
                 input_vec = pd.DataFrame([row[feature_cols]])
@@ -161,7 +187,16 @@ with tab_trained:
                 col_res, col_log = st.columns([1, 1.5])
 
                 with col_res:
-                    if pred == 1:
+                    if is_psu_metal:
+                         # FORCE SAFE for Metal PSUs
+                         st.markdown(f"""
+                        <div class="psu-terminal-card">
+                            <h2>SOVEREIGN BACKED</h2>
+                            <h1>SAFE</h1>
+                            <p style="color:#FFD700; font-size:0.8rem;">GOVT OWNERSHIP DETECTED</p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                    elif pred == 1:
                         st.markdown(f"""
                         <div class="risk-terminal-card">
                             <h2>RISK LEVEL: CRITICAL</h2>
@@ -181,27 +216,31 @@ with tab_trained:
                 with col_log:
                     st.markdown("#### 🔍 CONTRIBUTING FACTORS")
 
-                    # LOGIC FOR DISPLAYING FACTORS (Regardless of Risk/Safe)
-                    factors = []
+                    if is_psu_metal:
+                         st.markdown("<div class='factor-warn'>• [NOTE] High Promoter Holding Flagged.</div>", unsafe_allow_html=True)
+                         st.markdown("<div class='factor-good'>• [OK] Identified as PSU (Govt backed). Risk Neutralized.</div>", unsafe_allow_html=True)
+                    else:
+                        # LOGIC FOR DISPLAYING FACTORS (Regardless of Risk/Safe)
+                        factors = []
 
-                    # 1. Pledge
-                    if row['Promoter_Pledge'] > 0.5: factors.append(f"<div class='factor-bad'>[!] High Promoter Pledge ({row['Promoter_Pledge']:.1%})</div>")
-                    else: factors.append(f"<div class='factor-good'>[OK] Low Pledge ({row['Promoter_Pledge']:.1%})</div>")
+                        # 1. Pledge
+                        if row['Promoter_Pledge'] > 0.5: factors.append(f"<div class='factor-bad'>[!] High Promoter Pledge ({row['Promoter_Pledge']:.1%})</div>")
+                        else: factors.append(f"<div class='factor-good'>[OK] Low Pledge ({row['Promoter_Pledge']:.1%})</div>")
 
-                    # 2. Asset Quality
-                    if row['Asset_Quality'] > 0.05: factors.append(f"<div class='factor-bad'>[!] Asset Quality Stress (NPA {row['Asset_Quality']:.1%})</div>")
-                    elif selected_sector == "Banking & Finance": factors.append(f"<div class='factor-good'>[OK] Asset Quality Stable</div>")
+                        # 2. Asset Quality
+                        if row['Asset_Quality'] > 0.05: factors.append(f"<div class='factor-bad'>[!] Asset Quality Stress (NPA {row['Asset_Quality']:.1%})</div>")
+                        elif selected_sector == "Banking & Finance": factors.append(f"<div class='factor-good'>[OK] Asset Quality Stable</div>")
 
-                    # 3. Auditor
-                    if row['Auditor_Quit'] == 1: factors.append("<div class='factor-bad'>[!] Auditor Resignation Detected</div>")
-                    elif row['Auditor_Quality'] == 1: factors.append("<div class='factor-good'>[OK] Big 4 Auditor Verified</div>")
+                        # 3. Auditor
+                        if row['Auditor_Quit'] == 1: factors.append("<div class='factor-bad'>[!] Auditor Resignation Detected</div>")
+                        elif row['Auditor_Quality'] == 1: factors.append("<div class='factor-good'>[OK] Big 4 Auditor Verified</div>")
 
-                    # 4. Volatility
-                    if row['Ann_Volatility'] > 0.5: factors.append(f"<div class='factor-bad'>[!] High Market Volatility ({row['Ann_Volatility']:.1%})</div>")
+                        # 4. Volatility
+                        if row['Ann_Volatility'] > 0.5: factors.append(f"<div class='factor-bad'>[!] High Market Volatility ({row['Ann_Volatility']:.1%})</div>")
 
-                    # Render Factors
-                    for f in factors:
-                        st.markdown(f, unsafe_allow_html=True)
+                        # Render Factors
+                        for f in factors:
+                            st.markdown(f, unsafe_allow_html=True)
 
         except:
             st.error(">> DATA_UNAVAILABLE_FOR_SELECTED_PERIOD")
@@ -302,6 +341,7 @@ with tab_custom:
                      if val_pledge > 50: st.markdown("<div class='factor-bad'>[!] High Promoter Pledge</div>", unsafe_allow_html=True)
                      if audit_quit_bin == 1: st.markdown("<div class='factor-bad'>[!] Auditor Resignation</div>", unsafe_allow_html=True)
                      if val_npa > 5: st.markdown("<div class='factor-bad'>[!] High Bad Loans (NPA)</div>", unsafe_allow_html=True)
+                     if val_profit < 0: st.markdown("<div class='factor-bad'>[!] Negative Profit Growth</div>", unsafe_allow_html=True)
                 else:
                      st.markdown("<div class='factor-good'>[OK] Strong Fundamentals Detected</div>", unsafe_allow_html=True)
                      st.markdown("<div class='factor-good'>[OK] No Critical Governance Flags</div>", unsafe_allow_html=True)
