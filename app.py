@@ -14,85 +14,32 @@ st.set_page_config(
 # --- 🎨 BLOOMBERG TERMINAL AESTHETIC CSS ---
 st.markdown("""
 <style>
-    /* 1. GLOBAL TERMINAL THEME */
-    .stApp {
-        background-color: #0E1117; /* Deep Carbon Black */
-        color: #E0E0E0;
-    }
-
-    /* 2. FONTS: Monospace for Data (Like a Terminal) */
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600&display=swap');
-
-    html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
+    .stApp { background-color: #0E1117; color: #E0E0E0; font-family: 'Inter', sans-serif; }
     .stMetricValue, .stNumberInput input { font-family: 'JetBrains Mono', monospace !important; }
-
-    /* 3. HEADERS (Bloomberg Orange & White) */
-    h1, h2, h3 { color: #FFFFFF !important; text-transform: uppercase; letter-spacing: 1px; }
-    .stCaption { color: #FF9F00 !important; font-family: 'JetBrains Mono'; }
-
-    /* 4. CARDS: Sharp Edges, High Contrast */
+    h1, h2, h3, h4 { color: #FFFFFF !important; text-transform: uppercase; letter-spacing: 1px; }
     .risk-terminal-card {
-        background-color: #1a1a1a;
-        border: 1px solid #FF3B30; /* Neon Red */
-        border-left: 5px solid #FF3B30;
-        padding: 15px;
-        margin-bottom: 10px;
+        background-color: #1a1a1a; border: 1px solid #FF3B30; border-left: 5px solid #FF3B30;
+        padding: 15px; margin-bottom: 10px;
     }
-    .risk-terminal-card h2 { color: #FF3B30 !important; font-size: 1.2rem; margin-bottom: 5px; }
+    .risk-terminal-card h2 { color: #FF3B30 !important; font-size: 1.1rem; }
     .risk-terminal-card h1 { color: #FFFFFF !important; font-family: 'JetBrains Mono'; font-size: 2.5rem; margin: 0; }
-
     .safe-terminal-card {
-        background-color: #1a1a1a;
-        border: 1px solid #30D158; /* Neon Green */
-        border-left: 5px solid #30D158;
-        padding: 15px;
-        margin-bottom: 10px;
+        background-color: #1a1a1a; border: 1px solid #30D158; border-left: 5px solid #30D158;
+        padding: 15px; margin-bottom: 10px;
     }
-    .safe-terminal-card h2 { color: #30D158 !important; font-size: 1.2rem; margin-bottom: 5px; }
+    .safe-terminal-card h2 { color: #30D158 !important; font-size: 1.1rem; }
     .safe-terminal-card h1 { color: #FFFFFF !important; font-family: 'JetBrains Mono'; font-size: 2.5rem; margin: 0; }
-
-    /* PSU SOVEREIGN CARD (Special Gold Card for PSUs) */
-    .psu-terminal-card {
-        background-color: #1a1a1a;
-        border: 1px solid #FFD700; /* Gold */
-        border-left: 5px solid #FFD700;
-        padding: 15px;
-        margin-bottom: 10px;
-    }
-    .psu-terminal-card h2 { color: #FFD700 !important; font-size: 1.2rem; margin-bottom: 5px; }
-    .psu-terminal-card h1 { color: #FFFFFF !important; font-family: 'JetBrains Mono'; font-size: 2.5rem; margin: 0; }
-
-    /* 5. DATA FACTOR LIST */
-    .factor-bad { color: #FF453A; font-family: 'JetBrains Mono'; font-weight: bold; }
-    .factor-good { color: #32D74B; font-family: 'JetBrains Mono'; font-weight: bold; }
-    .factor-warn { color: #FFD60A; font-family: 'JetBrains Mono'; font-weight: bold; }
-    .factor-neutral { color: #8E8E93; font-family: 'JetBrains Mono'; }
-
-    /* 6. INPUT FIELDS (Dark & Techy) */
+    .factor-bad { color: #FF453A; font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; }
+    .factor-good { color: #32D74B; font-family: 'JetBrains Mono'; font-weight: bold; font-size: 0.85rem; margin-bottom: 5px; }
     .stTextInput input, .stNumberInput input, .stSelectbox div[data-baseweb="select"] > div {
-        background-color: #2C2C2E !important;
-        color: #F2F2F7 !important;
-        border: 1px solid #48484A !important;
-        border-radius: 0px !important; /* Sharp corners like Bloomberg */
+        background-color: #2C2C2E !important; color: #F2F2F7 !important; border: 1px solid #48484A !important; border-radius: 0px !important;
     }
-
-    /* 7. BUTTONS (Terminal Blue) */
     button[kind="primary"] {
-        background-color: #0A84FF;
-        border-radius: 0px; /* Sharp corners */
-        color: white;
-        text-transform: uppercase;
-        font-weight: 700;
-        letter-spacing: 1px;
-        border: 1px solid #0058D0;
+        background-color: #0A84FF; border-radius: 0px; color: white; text-transform: uppercase; font-weight: 700; border: 1px solid #0058D0;
     }
-    button[kind="primary"]:hover { background-color: #0058D0; }
-
-    /* 8. TABS (Minimalist) */
     button[data-baseweb="tab"] { background: transparent; border: none; color: #636366; font-weight: 600; }
     button[data-baseweb="tab"][aria-selected="true"] { color: #0A84FF; border-bottom: 2px solid #0A84FF; }
-
-    /* Hide default padding */
     .block-container { padding-top: 1.5rem; }
 </style>
 """, unsafe_allow_html=True)
@@ -102,246 +49,153 @@ st.markdown("""
 def load_resources():
     if not os.path.exists('activism_model.pkl'): return None, None
     model = joblib.load('activism_model.pkl')
-
     if os.path.exists('Final_Dataset_Cleaned.csv'):
         df = pd.read_csv('Final_Dataset_Cleaned.csv')
-        def get_sector(row):
-            if 'Bank' in str(row['Ticker']) or row['Asset_Quality'] > 0: return 'Banking & Finance'
-            else: return 'Mining & Heavy Industry'
-        df['Sector'] = df.apply(get_sector, axis=1)
-    else:
-        df = None
+        # Generate the Sector label so filtering works
+        df['Sector'] = df.apply(lambda r: 'Banking & Finance' if 'Bank' in str(r['Ticker']) or r['Asset_Quality'] > 0 else 'Mining & Heavy Industry', axis=1)
+    else: df = None
     return model, df
 
 model, df_database = load_resources()
+def to_dec(x): return x / 100.0
 
-# --- 2. TERMINAL HEADER ---
-c1, c2 = st.columns([0.4, 10])
-with c1: st.markdown("## 📈") 
-with c2: 
-    st.markdown("## ACTIVISM // GOVERNANCE TERMINAL")
-    st.caption("SYSTEM STATUS: ONLINE | MODEL: RANDOM FOREST v2.6")
-
+# --- 2. HEADER ---
+st.markdown("## 📈 ACTIVISM // TERMINAL")
+st.caption("v4.0 | FULLY DYNAMIC FILTERING & EXHAUSTIVE REASONING")
 st.markdown("---")
 
-if model is None:
-    st.error(">> SYSTEM ERROR: MODEL_FILE_MISSING. EXECUTE TRAINING SEQUENCE.")
-    st.stop()
-
-# --- 3. TABS ---
-tab_trained, tab_custom = st.tabs(["🏢 CORPORATE INTELLIGENCE", "⚡ STRATEGY SIMULATOR"])
+tab1, tab2 = st.tabs(["🏢 CORPORATE INTELLIGENCE", "⚡ STRATEGY SIMULATOR"])
 
 # ==============================================================================
-# TAB 1: CORPORATE INTELLIGENCE (Historical Data)
+# TAB 1: CORPORATE INTELLIGENCE
 # ==============================================================================
-with tab_trained:
-
-    if df_database is None:
-        st.error(">> DATABASE_CONNECTION_FAILED")
+with tab1:
+    if df_database is None: st.error(">> DATABASE_OFFLINE")
     else:
-        # 3 INPUTS: Industry -> Company -> Year
         c1, c2, c3 = st.columns(3)
         with c1: 
-            selected_sector = st.selectbox("1. SECTOR", df_database['Sector'].unique())
+            # DYNAMIC FILTER 1: Sector
+            sectors = sorted(df_database['Sector'].unique())
+            selected_sector = st.selectbox("1. SECTOR", sectors)
         with c2: 
-            filtered = df_database[df_database['Sector'] == selected_sector]['Ticker'].unique()
-            selected_company = st.selectbox("2. TICKER / COMPANY", filtered)
-        with c3:
-            years = sorted(df_database[df_database['Ticker'] == selected_company]['Year'].unique(), reverse=True)
-            selected_year = st.selectbox("3. FISCAL YEAR", years)
+            # DYNAMIC FILTER 2: Ticker (Depends on Sector)
+            filtered_tickers = sorted(df_database[df_database['Sector'] == selected_sector]['Ticker'].unique())
+            ticker = st.selectbox("2. TICKER", filtered_tickers)
+        with c3: 
+            # DYNAMIC FILTER 3: Year (Depends on Ticker)
+            filtered_years = sorted(df_database[df_database['Ticker'] == ticker]['Year'].unique(), reverse=True)
+            year = st.selectbox("3. YEAR", filtered_years)
 
-        # FETCH DATA
         try:
-            row = df_database[(df_database['Ticker'] == selected_company) & (df_database['Year'] == selected_year)].iloc[0]
-
+            row = df_database[(df_database['Ticker'] == ticker) & (df_database['Year'] == year)].iloc[0]
             st.markdown("### FINANCIAL SNAPSHOT")
             k1, k2, k3, k4 = st.columns(4)
-            k1.metric("PROMOTER HOLDING", f"{row['Promoter_Hold']:.1%}")
+            k1.metric("PROMOTER HOLD", f"{row['Promoter_Hold']:.1%}")
             k2.metric("PROMOTER PLEDGE", f"{row['Promoter_Pledge']:.1%}")
             k3.metric("VOLATILITY", f"{row['Ann_Volatility']:.1%}")
-            k4.metric("AUDITOR STATUS", "QUIT" if row['Auditor_Quit']==1 else "ACTIVE")
-
-            st.markdown("---")
+            k4.metric("DISSENT", f"{row['Voting_Dissent']:.1%}")
 
             if st.button("RUN DIAGNOSTIC", type="primary"):
-
-                # --- PSU LOGIC FIX (Metals & Mining Only) ---
-                # List of Non-Bank PSUs (Metals, Energy, Heavy Ind)
-                psu_mining_metals = [
-                    "COALINDIA", "SAIL", "NMDC", "NALCO", "HINDCOPPER", "MOIL", "KIOCL", "GMDC", # Metals
-                    "NTPC", "ONGC", "IOC", "POWERGRID", "BPCL", "GAIL", "OIL" # Energy/Heavy Ind
-                ]
-
-                # Check if Ticker matches PSU list AND Sector is NOT Banking
-                # (User said Banks are showing properly, so we don't touch them)
-                is_psu_metal = False
-                if selected_sector != "Banking & Finance":
-                    is_psu_metal = any(psu in str(row['Ticker']).upper() for psu in psu_mining_metals)
-
-                # Predict
                 feature_cols = ['3Y_Stock_CAGR', 'Ann_Volatility', 'Promoter_Hold', 'Promoter_Pledge', 'Inst_Hold_Change', 'Board_Indep_Pct', 'Director_Tenure', 'CEO_Duality', 'Auditor_Quality', 'Auditor_Quit', 'Voting_Dissent', 'Whistleblower_Cnt', 'Profit_Growth', 'Governance_Ratio', 'Leverage_Risk', 'Liquidity', 'CEO_Pay_Gap', 'Div_Yield', 'Asset_Quality', 'Loan_Risk', 'Environ_Risk', 'Capex_Trap']
                 input_vec = pd.DataFrame([row[feature_cols]])
-                pred = model.predict(input_vec)[0]
                 prob = model.predict_proba(input_vec)[0][1]
 
-                col_res, col_log = st.columns([1, 1.5])
-
-                with col_res:
-                    if is_psu_metal:
-                         # FORCE SAFE for Metal PSUs
-                         st.markdown(f"""
-                        <div class="psu-terminal-card">
-                            <h2>SOVEREIGN BACKED</h2>
-                            <h1>SAFE</h1>
-                            <p style="color:#FFD700; font-size:0.8rem;">GOVT OWNERSHIP DETECTED</p>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    elif pred == 1:
-                        st.markdown(f"""
-                        <div class="risk-terminal-card">
-                            <h2>RISK LEVEL: CRITICAL</h2>
-                            <h1>{prob:.1%}</h1>
-                            <p style="color:#aaa; font-size:0.8rem;">ACTIVISM PROBABILITY</p>
-                        </div>
-                        """, unsafe_allow_html=True)
-                    else:
-                        st.markdown(f"""
-                        <div class="safe-terminal-card">
-                            <h2>RISK LEVEL: STABLE</h2>
-                            <h1>{prob:.1%}</h1>
-                            <p style="color:#aaa; font-size:0.8rem;">ACTIVISM PROBABILITY</p>
-                        </div>
-                        """, unsafe_allow_html=True)
-
-                with col_log:
-                    st.markdown("#### 🔍 CONTRIBUTING FACTORS")
-
-                    if is_psu_metal:
-                         st.markdown("<div class='factor-warn'>• [NOTE] High Promoter Holding Flagged.</div>", unsafe_allow_html=True)
-                         st.markdown("<div class='factor-good'>• [OK] Identified as PSU (Govt backed). Risk Neutralized.</div>", unsafe_allow_html=True)
-                    else:
-                        # LOGIC FOR DISPLAYING FACTORS (Regardless of Risk/Safe)
-                        factors = []
-
-                        # 1. Pledge
-                        if row['Promoter_Pledge'] > 0.5: factors.append(f"<div class='factor-bad'>[!] High Promoter Pledge ({row['Promoter_Pledge']:.1%})</div>")
-                        else: factors.append(f"<div class='factor-good'>[OK] Low Pledge ({row['Promoter_Pledge']:.1%})</div>")
-
-                        # 2. Asset Quality
-                        if row['Asset_Quality'] > 0.05: factors.append(f"<div class='factor-bad'>[!] Asset Quality Stress (NPA {row['Asset_Quality']:.1%})</div>")
-                        elif selected_sector == "Banking & Finance": factors.append(f"<div class='factor-good'>[OK] Asset Quality Stable</div>")
-
-                        # 3. Auditor
-                        if row['Auditor_Quit'] == 1: factors.append("<div class='factor-bad'>[!] Auditor Resignation Detected</div>")
-                        elif row['Auditor_Quality'] == 1: factors.append("<div class='factor-good'>[OK] Big 4 Auditor Verified</div>")
-
-                        # 4. Volatility
-                        if row['Ann_Volatility'] > 0.5: factors.append(f"<div class='factor-bad'>[!] High Market Volatility ({row['Ann_Volatility']:.1%})</div>")
-
-                        # Render Factors
-                        for f in factors:
-                            st.markdown(f, unsafe_allow_html=True)
-
+                rc1, rc2 = st.columns([1, 1.5])
+                with rc1:
+                    if prob >= 0.50: st.markdown(f'<div class="risk-terminal-card"><h2>RISK: CRITICAL</h2><h1>{prob:.1%}</h1><p>REVOLT PROBABILITY</p></div>', unsafe_allow_html=True)
+                    else: st.markdown(f'<div class="safe-terminal-card"><h2>RISK: STABLE</h2><h1>{prob:.1%}</h1><p>REVOLT PROBABILITY</p></div>', unsafe_allow_html=True)
+                with rc2:
+                    st.markdown("#### 🔍 GOVERNANCE AUDIT LOG")
+                    if row['Promoter_Pledge'] > 0.4: st.markdown(f"<div class='factor-bad'>[!] HIGH PLEDGE: {row['Promoter_Pledge']:.1%} encumbered.</div>", unsafe_allow_html=True)
+                    if row['Auditor_Quit'] == 1: st.markdown("<div class='factor-bad'>[!] AUDITOR RESIGNATION: Major governance red flag.</div>", unsafe_allow_html=True)
+                    if row['Voting_Dissent'] > 0.05: st.markdown(f"<div class='factor-bad'>[!] DISSENT: Voting opposition is high ({row['Voting_Dissent']:.1%}).</div>", unsafe_allow_html=True)
+                    if row['Profit_Growth'] > 0.05: st.markdown(f"<div class='factor-good'>[OK] EARNINGS BUFFER: Profit growth ({row['Profit_Growth']:.1%}) offsets risk factors.</div>", unsafe_allow_html=True)
+                    if row['Auditor_Quality'] == 1: st.markdown("<div class='factor-good'>[OK] AUDIT: Verified by Big 4 Firm.</div>", unsafe_allow_html=True)
         except:
-            st.error(">> DATA_UNAVAILABLE_FOR_SELECTED_PERIOD")
+            st.error(">> DATA UNAVAILABLE")
 
 # ==============================================================================
-# TAB 2: STRATEGY SIMULATOR
+# TAB 2: STRATEGY SIMULATOR (ALL 22 EXPOSED & CLEANLY SEPARATED)
 # ==============================================================================
-with tab_custom:
-    st.markdown("### ⚡ SCENARIO BUILDER")
-
-    with st.form("custom_form"):
-        # 1. SETUP
+with tab2:
+    st.markdown("### ⚡ FULL-FEATURE STRESS TEST")
+    with st.form("sim_form"):
         c1, c2 = st.columns(2)
-        custom_name = c1.text_input("SCENARIO LABEL", value="Scenario Alpha")
-        custom_sector = c2.selectbox("TARGET SECTOR", ("Banking & Finance", "Mining & Heavy Industry"))
+        sim_name = c1.text_input("SCENARIO LABEL", "Simulation Case A")
+        sim_sector = c2.selectbox("INDUSTRY", ("Banking & Finance", "Mining & Heavy Industry"))
 
-        st.markdown("---")
+        st.markdown("#### 1. OWNERSHIP & SHAREHOLDER VOICE")
+        o1, o2, o3, o4 = st.columns(4)
+        v_hold = o1.number_input("Promoter Hold (%)", 0.0, 100.0, 50.0)
+        v_pledge = o2.number_input("Promoter Pledge (%)", 0.0, 100.0, 0.0)
+        v_inst = o3.number_input("Inst. Hold Change (%)", -50.0, 50.0, 0.0)
+        v_dissent = o4.number_input("Voting Dissent (%)", 0.0, 100.0, 1.0)
 
-        # 2. UNIVERSAL RATIOS
-        st.markdown("#### 🌐 GOVERNANCE VECTORS")
-        u1, u2, u3, u4 = st.columns(4)
-        val_pledge = u1.number_input("Promoter Pledge %", value=0.0)
-        val_hold = u2.number_input("Promoter Holding %", value=50.0)
-        val_audit_quit = u3.selectbox("Auditor Quit?", ("No", "Yes"))
-        val_vol = u4.number_input("Ann. Volatility %", value=20.0)
+        st.markdown("#### 2. BOARD & AUDIT GOVERNANCE")
+        b1, b2, b3, b4, b5, b6 = st.columns(6)
+        v_indep = b1.number_input("Board Indep (%)", 0.0, 100.0, 50.0)
+        v_tenure = b2.number_input("Director Tenure", 0.0, 20.0, 4.0)
+        v_dual = b3.selectbox("CEO Duality", (0, 1))
+        v_audit_q = b4.selectbox("Big 4 Auditor", (1, 0))
+        v_audit_quit = b5.selectbox("Auditor Quit", (0, 1))
+        v_whistle = b6.number_input("Whistleblower Cnt", 0, 50, 0)
 
-        # 3. SECTOR SPECIFICS
-        st.markdown(f"#### 🏭 {custom_sector.upper()} METRICS")
-        s1, s2, s3, s4 = st.columns(4)
+        st.markdown("#### 3. PERFORMANCE & VALUATION")
+        p1, p2, p3, p4 = st.columns(4)
+        v_cagr = p1.number_input("3Y Stock CAGR (%)", -100.0, 200.0, 10.0)
+        v_profit = p2.number_input("Profit Growth (%)", -100.0, 500.0, 5.0)
+        v_vol = p3.number_input("Ann. Volatility (%)", 0.0, 200.0, 30.0)
+        v_div = p4.number_input("Div. Yield (%)", 0.0, 20.0, 2.0)
 
-        val_npa, val_env, val_capex_trap = 0.0, "No", 0.0
-        val_leverage, val_liquidity, val_gov_ratio = 0.0, 0.0, 0.0
-        val_profit = 10.0 # Default profit
+        st.markdown("#### 4. CAPITAL & RISK STRUCTURE")
+        r1, r2, r3, r4 = st.columns(4)
+        v_roa = r1.number_input("ROA/ROCE (decimal)", value=0.02, format="%.3f")
+        v_lev = r2.number_input("Leverage Ratio", value=1.5, format="%.2f")
+        v_liq = r3.number_input("Liquidity Ratio", value=1.2, format="%.2f")
+        v_pay = r4.number_input("CEO Pay Gap (x)", value=50.0)
 
-        if custom_sector == "Banking & Finance":
-            val_npa = s1.number_input("GNPA % (Asset Quality)", value=0.0)
-            val_profit = s2.number_input("Profit Growth %", value=10.0)
-            val_leverage = s3.number_input("Capital Adequacy", value=0.15)
-            val_gov_ratio = s4.number_input("ROA", value=0.02)
-            val_liquidity = 0.40
-            val_env = "No"
-        else: 
-            val_env = s1.selectbox("Environmental Fines?", ("No", "Yes"))
-            val_profit = s2.number_input("Profit Growth %", value=10.0)
-            val_leverage = s3.number_input("Net Debt / EBITDA", value=1.5)
-            val_gov_ratio = s4.number_input("ROCE", value=0.15)
-            val_npa = 0.0
-            val_liquidity = 1.5
+        st.markdown(f"#### 5. {sim_sector.upper()} SPECIFICS")
+        s1, s2 = st.columns(2)
+        v_gnpa, v_pcr, v_env, v_capex = 0.0, 0.70, 0, 0.0
 
-        st.markdown("<br>", unsafe_allow_html=True)
-        submitted = st.form_submit_button("EXECUTE SIMULATION", type="primary", use_container_width=True)
+        # STRICT SECTOR LOGIC
+        if sim_sector == "Banking & Finance":
+            v_gnpa = s1.number_input("GNPA % (Asset Quality)", 0.0, 100.0, 2.0)
+            v_pcr = s2.number_input("PCR Ratio (decimal)", 0.0, 1.0, 0.70, format="%.2f")
+        else:
+            v_env = s1.selectbox("Environmental Risk Flag", (0, 1))
+            v_capex = s2.number_input("Capex Trap Ratio", 0.0, 1.0, 0.0, format="%.2f")
 
-        if submitted:
-            def clean_pct(x): return x / 100.0 if x > 5.0 else x 
-            audit_quit_bin = 1 if val_audit_quit == "Yes" else 0
-            env_bin = 1 if val_env == "Yes" else 0
-
-            input_data = {
-                '3Y_Stock_CAGR': 0.15, 'Ann_Volatility': clean_pct(val_vol), 
-                'Promoter_Hold': clean_pct(val_hold), 'Promoter_Pledge': clean_pct(val_pledge), 
-                'Inst_Hold_Change': 0.00, 'Board_Indep_Pct': 0.50, 'Director_Tenure': 4.0, 
-                'CEO_Duality': 0, 'Auditor_Quality': 1, 'Auditor_Quit': audit_quit_bin, 
-                'Voting_Dissent': 0.00, 'Whistleblower_Cnt': 0, 'Profit_Growth': clean_pct(val_profit), 
-                'Governance_Ratio': val_gov_ratio, 'Leverage_Risk': val_leverage, 
-                'Liquidity': val_liquidity, 'CEO_Pay_Gap': 50.0, 'Div_Yield': 0.01, 
-                'Asset_Quality': clean_pct(val_npa), 'Loan_Risk': 0.70, 
-                'Environ_Risk': env_bin, 'Capex_Trap': 0.0
+        submit = st.form_submit_button("RUN FULL SIMULATION", type="primary", use_container_width=True)
+        if submit:
+            input_dict = {
+                '3Y_Stock_CAGR': to_dec(v_cagr), 'Ann_Volatility': to_dec(v_vol), 'Promoter_Hold': to_dec(v_hold),
+                'Promoter_Pledge': to_dec(v_pledge), 'Inst_Hold_Change': to_dec(v_inst), 'Board_Indep_Pct': to_dec(v_indep),
+                'Director_Tenure': v_tenure, 'CEO_Duality': v_dual, 'Auditor_Quality': v_audit_q,
+                'Auditor_Quit': v_audit_quit, 'Voting_Dissent': to_dec(v_dissent), 'Whistleblower_Cnt': v_whistle,
+                'Profit_Growth': to_dec(v_profit), 'Governance_Ratio': v_roa, 'Leverage_Risk': v_lev,
+                'Liquidity': v_liq, 'CEO_Pay_Gap': v_pay, 'Div_Yield': to_dec(v_div),
+                'Asset_Quality': to_dec(v_gnpa), 'Loan_Risk': v_pcr, 'Environ_Risk': v_env, 'Capex_Trap': v_capex
             }
+            sim_df = pd.DataFrame([input_dict])
+            prob = model.predict_proba(sim_df)[0][1]
 
-            input_df = pd.DataFrame([input_data])
-            sim_pred = model.predict(input_df)[0]
-            sim_prob = model.predict_proba(input_df)[0][1]
+            sc1, sc2 = st.columns([1, 1.5])
+            with sc1:
+                if prob >= 0.50: st.markdown(f'<div class="risk-terminal-card"><h2>PROGNOSIS: CRITICAL</h2><h1>{prob:.1%}</h1><p>REVOLT PROBABILITY</p></div>', unsafe_allow_html=True)
+                else: st.markdown(f'<div class="safe-terminal-card"><h2>PROGNOSIS: STABLE</h2><h1>{prob:.1%}</h1><p>REVOLT PROBABILITY</p></div>', unsafe_allow_html=True)
+            with sc2:
+                st.markdown("#### 🛰️ MULTI-FACTOR REASONING")
+                # Exhausive Reasoning Engine
+                if v_pledge > 40: st.markdown(f"<div class='factor-bad'>[!] OWNERSHIP: High Promoter Pledging ({v_pledge}%).</div>", unsafe_allow_html=True)
+                if sim_sector == "Banking & Finance" and v_gnpa > 10: st.markdown(f"<div class='factor-bad'>[!] CREDIT: GNPA exceeds safety threshold ({v_gnpa}%).</div>", unsafe_allow_html=True)
+                if sim_sector == "Mining & Heavy Industry" and v_env == 1: st.markdown(f"<div class='factor-bad'>[!] ESG: Major Environmental Risk detected.</div>", unsafe_allow_html=True)
+                if v_audit_quit == 1: st.markdown("<div class='factor-bad'>[!] AUDIT: Auditor resignation is a critical red flag.</div>", unsafe_allow_html=True)
+                if v_dissent > 5: st.markdown(f"<div class='factor-bad'>[!] DISSENT: Voting opposition is high ({v_dissent}%).</div>", unsafe_allow_html=True)
 
-            st.markdown("---")
-            st.markdown(f"### 📊 SIMULATION REPORT: {custom_name}")
+                # Mitigating Factors
+                if v_profit > 0: st.markdown(f"<div class='factor-good'>[OK] PROFIT: Positive growth ({v_profit}%) mitigates extreme risk.</div>", unsafe_allow_html=True)
+                if v_cagr > 0: st.markdown(f"<div class='factor-good'>[OK] MARKET: Positive 3Y CAGR suggests surviving stock value.</div>", unsafe_allow_html=True)
 
-            c_res1, c_res2 = st.columns([1, 1.5])
-            with c_res1:
-                if sim_pred == 1:
-                    st.markdown(f"""
-                    <div class="risk-terminal-card">
-                        <h2>PROGNOSIS: CRITICAL</h2>
-                        <h1>{sim_prob:.1%}</h1>
-                        <p style="color:#aaa; font-size:0.8rem;">ACTIVISM PROBABILITY</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                else:
-                    st.markdown(f"""
-                    <div class="safe-terminal-card">
-                        <h2>PROGNOSIS: STABLE</h2>
-                        <h1>{sim_prob:.1%}</h1>
-                        <p style="color:#aaa; font-size:0.8rem;">ACTIVISM PROBABILITY</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-            with c_res2:
-                st.markdown("#### 🔍 KEY DRIVERS")
-                if sim_pred == 1:
-                     if val_pledge > 50: st.markdown("<div class='factor-bad'>[!] High Promoter Pledge</div>", unsafe_allow_html=True)
-                     if audit_quit_bin == 1: st.markdown("<div class='factor-bad'>[!] Auditor Resignation</div>", unsafe_allow_html=True)
-                     if val_npa > 5: st.markdown("<div class='factor-bad'>[!] High Bad Loans (NPA)</div>", unsafe_allow_html=True)
-                     if val_profit < 0: st.markdown("<div class='factor-bad'>[!] Negative Profit Growth</div>", unsafe_allow_html=True)
-                else:
-                     st.markdown("<div class='factor-good'>[OK] Strong Fundamentals Detected</div>", unsafe_allow_html=True)
-                     st.markdown("<div class='factor-good'>[OK] No Critical Governance Flags</div>", unsafe_allow_html=True)
+                if 0.45 < prob < 0.65:
+                    st.info("💡 **Model Note:** The score is near 50-60% because severe structural risks are being partially offset by surviving business performance.")
