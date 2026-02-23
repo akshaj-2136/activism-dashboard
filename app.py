@@ -34,7 +34,7 @@ def get_base64_of_bin_file(bin_file):
 
 def set_background(sector_name):
     if sector_name == "Banking & Finance":
-        file_path = "banking background.jpeg"
+        file_path = "Banking background.jpeg"
     else:
         file_path = "mining background.jpeg"
 
